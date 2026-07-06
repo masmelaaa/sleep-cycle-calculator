@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <title>Ciclos de Sueño</title>
+  <meta name="description" content="Calcula la mejor hora para dormir o despertar según ciclos de sueño de 90 minutos." />
+
+  <!-- iOS home screen -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Ciclos" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png" />
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png" />
+  <meta name="theme-color" content="#1b1035" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1 class="title">Ciclos de sueño</h1>
+      <p class="subtitle">Cada ciclo dura 90 min. Despertar al final de uno te deja fresco.</p>
+    </header>
+
+    <div class="segmented" role="tablist" aria-label="Modo de cálculo">
+      <button class="segmented__option" role="tab" id="tab-wake" aria-selected="true" data-mode="wake">
+        Quiero despertar a...
+      </button>
+      <button class="segmented__option" role="tab" id="tab-sleep" aria-selected="false" data-mode="sleep">
+        Me duermo ahora
+      </button>
+      <div class="segmented__thumb" aria-hidden="true"></div>
+    </div>
+
+    <section class="panel" id="panel-wake" role="tabpanel" aria-labelledby="tab-wake">
+      <label class="field">
+        <span class="field__label">Hora a la que quieres despertar</span>
+        <input type="time" id="wake-time" class="field__input" />
+      </label>
+      <button class="cta" id="calc-wake">Calcular horas para dormir</button>
+    </section>
+
+    <section class="panel" id="panel-sleep" role="tabpanel" aria-labelledby="tab-sleep" hidden>
+      <p class="now-readout" id="now-readout"></p>
+      <button class="cta" id="calc-sleep">Calcular horas para despertar</button>
+    </section>
+
+    <section class="results" id="results" aria-live="polite"></section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

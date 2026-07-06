@@ -1,0 +1,16 @@
+{
+  "name": "Calculadora de Ciclos de Sueño",
+  "short_name": "Ciclos",
+  "description": "Calcula la mejor hora para dormir o despertar según ciclos de sueño de 90 minutos.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#120a26",
+  "theme_color": "#1b1035",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
