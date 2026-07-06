@@ -1,17 +1,30 @@
 :root {
-  --bg-top: #1b1035;
-  --bg-bottom: #120a26;
-  --panel: rgba(255, 255, 255, 0.06);
-  --panel-border: rgba(255, 255, 255, 0.09);
-  --text: #f3eefc;
-  --text-dim: #b8aed1;
-  --accent: #ffcf8f;
-  --accent-strong: #ffe9c7;
-  --accent-ink: #241305;
-  --recommended: rgba(255, 207, 143, 0.14);
+  --bg: #ffffff;
+  --text: #191919;
+  --text-dim: #787774;
+  --panel: #f7f7f5;
+  --panel-border: rgba(15, 15, 15, 0.1);
+  --accent: #191919;
+  --accent-ink: #ffffff;
+  --recommended: rgba(15, 15, 15, 0.045);
+  --recommended-border: rgba(15, 15, 15, 0.28);
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191919;
+    --text: #e9e9e7;
+    --text-dim: #9b9b9b;
+    --panel: #2c2c2c;
+    --panel-border: rgba(255, 255, 255, 0.11);
+    --accent: #e9e9e7;
+    --accent-ink: #191919;
+    --recommended: rgba(255, 255, 255, 0.06);
+    --recommended-border: rgba(255, 255, 255, 0.32);
+  }
 }
 
 * {
@@ -25,11 +38,12 @@ html, body {
 body {
   margin: 0;
   min-height: 100dvh;
-  background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom) 70%);
+  background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  transition: background 200ms ease, color 200ms ease;
 }
 
 .app {
@@ -65,9 +79,9 @@ body {
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--panel);
   border: 1px solid var(--panel-border);
-  border-radius: 14px;
+  border-radius: 10px;
   padding: 4px;
   gap: 2px;
 }
@@ -83,7 +97,7 @@ body {
   font-size: 13.5px;
   font-weight: 600;
   padding: 10px 8px;
-  border-radius: 10px;
+  border-radius: 7px;
   cursor: pointer;
   transition: color 200ms ease;
 }
@@ -99,7 +113,7 @@ body {
   width: calc(50% - 5px);
   height: calc(100% - 8px);
   background: var(--accent);
-  border-radius: 10px;
+  border-radius: 7px;
   transition: transform 220ms var(--ease-out);
   will-change: transform;
 }
@@ -144,9 +158,9 @@ body {
   color: var(--text);
   background: var(--panel);
   border: 1px solid var(--panel-border);
-  border-radius: 14px;
+  border-radius: 10px;
   padding: 14px 16px;
-  color-scheme: dark;
+  color-scheme: light dark;
 }
 
 .field__input:focus {
@@ -157,7 +171,7 @@ body {
 .now-readout {
   background: var(--panel);
   border: 1px solid var(--panel-border);
-  border-radius: 14px;
+  border-radius: 10px;
   padding: 16px;
   margin: 0;
   font-size: 22px;
@@ -183,21 +197,21 @@ body {
   font-weight: 700;
   font-size: 16px;
   color: var(--accent-ink);
-  background: linear-gradient(180deg, var(--accent-strong), var(--accent));
+  background: var(--accent);
   padding: 15px 20px;
-  border-radius: 14px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: transform 160ms var(--ease-out), filter 160ms ease;
+  transition: transform 160ms var(--ease-out), opacity 160ms ease;
 }
 
 .cta:active {
   transform: scale(0.97);
-  filter: brightness(0.96);
+  opacity: 0.85;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .cta:hover {
-    filter: brightness(1.04);
+    opacity: 0.92;
   }
 }
 
@@ -215,7 +229,7 @@ body {
   gap: 12px;
   background: var(--panel);
   border: 1px solid var(--panel-border);
-  border-radius: 14px;
+  border-radius: 10px;
   padding: 14px 16px;
   opacity: 0;
   transform: scale(0.95) translateY(6px);
@@ -229,14 +243,19 @@ body {
 
 .result-card[data-recommended="true"] {
   background: var(--recommended);
-  border-color: rgba(255, 207, 143, 0.35);
+  border-color: var(--recommended-border);
 }
 
-.result-card__time {
-  font-size: 21px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  font-variant-numeric: tabular-nums;
+.result-card__time-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.result-card__day {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-dim);
 }
 
 .result-card--split {
@@ -294,7 +313,7 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--accent-strong);
+  color: var(--text);
 }
 
 @media (prefers-reduced-motion: reduce) {

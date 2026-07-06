@@ -70,11 +70,12 @@ function hexToRgb(hex) {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-// Palette: deep night-sky gradient + soft moonlight crescent
-const TOP = hexToRgb('#1b1035'); // deep indigo-violet
-const BOTTOM = hexToRgb('#3a2360'); // warmer violet
-const MOON_LIGHT = hexToRgb('#ffe9c7'); // warm moonlight
-const MOON_SHADOW = hexToRgb('#ffcf8f');
+// Palette: monochrome black & white (Notion-style) - flat black tile,
+// white crescent moon and stars. No gradient, no color.
+const TOP = hexToRgb('#191919');
+const BOTTOM = hexToRgb('#191919');
+const MOON_LIGHT = hexToRgb('#ffffff');
+const MOON_SHADOW = hexToRgb('#ffffff');
 
 function drawIcon({ size, moonScale = 0.62, stars = true, cornerRadius = 0.22 }) {
   const rgba = Buffer.alloc(size * size * 4);
@@ -146,8 +147,8 @@ function drawIcon({ size, moonScale = 0.62, stars = true, cornerRadius = 0.22 })
             const core = d < sr ? 1 : 0;
             const intensity = Math.max(core, glow * 0.5);
             r_ = mix(r_, 255, intensity);
-            g_ = mix(g_, 250, intensity);
-            b_ = mix(b_, 235, intensity);
+            g_ = mix(g_, 255, intensity);
+            b_ = mix(b_, 255, intensity);
           }
         }
       }

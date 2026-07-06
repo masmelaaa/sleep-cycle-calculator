@@ -25,6 +25,10 @@ function formatDayLabel(date, reference) {
   return sameDay ? 'hoy' : 'mañana';
 }
 
+function timeAndDay(date, reference) {
+  return { time: formatTime(date), day: formatDayLabel(date, reference) };
+}
+
 function switchTab(mode) {
   if (mode === currentMode) return;
   currentMode = mode;
@@ -71,6 +75,10 @@ function mountCards(cards) {
   });
 }
 
+function timeMarkup(time, day, extraClass = '') {
+  return `<span class="result-card__row-time ${extraClass}">${time}</span><span class="result-card__day">${day}</span>`;
+}
+
 function renderResults(items) {
   resultsEl.innerHTML = '';
   const cards = items.map((item) => {
@@ -78,7 +86,7 @@ function renderResults(items) {
     card.className = 'result-card';
     if (item.recommended) card.dataset.recommended = 'true';
     card.innerHTML = `
-      <span class="result-card__time">${item.timeLabel}</span>
+      <span class="result-card__time-wrap">${timeMarkup(item.time, item.day, 'result-card__row-time--primary')}</span>
       <span class="result-card__meta">
         <span class="result-card__cycles">${item.cycles} ciclos · ${item.hoursLabel}</span>
         ${item.recommended ? '<span class="result-card__badge">Recomendado</span>' : ''}
@@ -99,11 +107,11 @@ function renderBedtimeResults(items) {
       <span class="result-card__times">
         <span class="result-card__row">
           <span class="result-card__row-label">Acostarse</span>
-          <span class="result-card__row-time">${item.bedLabel}</span>
+          <span class="result-card__time-wrap">${timeMarkup(item.bedTime.time, item.bedTime.day)}</span>
         </span>
         <span class="result-card__row">
           <span class="result-card__row-label">Dormir</span>
-          <span class="result-card__row-time result-card__row-time--primary">${item.sleepLabel}</span>
+          <span class="result-card__time-wrap">${timeMarkup(item.sleepTime.time, item.sleepTime.day, 'result-card__row-time--primary')}</span>
         </span>
       </span>
       <span class="result-card__meta">
@@ -141,8 +149,8 @@ document.getElementById('calc-wake').addEventListener('click', () => {
       return {
         cycles,
         date: bedTime,
-        bedLabel: `${formatTime(bedTime)} · ${formatDayLabel(bedTime, now)}`,
-        sleepLabel: `${formatTime(sleepTime)} · ${formatDayLabel(sleepTime, now)}`,
+        bedTime: timeAndDay(bedTime, now),
+        sleepTime: timeAndDay(sleepTime, now),
         hoursLabel: hoursLabel(cycles * CYCLE_MIN),
         recommended: cycles === 5 || cycles === 6,
       };
@@ -163,7 +171,7 @@ document.getElementById('calc-sleep').addEventListener('click', () => {
       return {
         cycles,
         date: wake,
-        timeLabel: `${formatTime(wake)} · ${formatDayLabel(wake, now)}`,
+        ...timeAndDay(wake, now),
         hoursLabel: hoursLabel(cycles * CYCLE_MIN),
         recommended: cycles === 5 || cycles === 6,
       };
