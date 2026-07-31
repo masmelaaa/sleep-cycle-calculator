@@ -8,24 +8,46 @@
 
   <!-- iOS home screen -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Ciclos" />
   <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png" />
   <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png" />
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#191919" />
+  <meta name="theme-color" content="#150e2e" />
 
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="bg-blob bg-blob--a" aria-hidden="true"></div>
+  <div class="bg-blob bg-blob--b" aria-hidden="true"></div>
+  <div class="bg-blob bg-blob--c" aria-hidden="true"></div>
+
   <div class="app">
     <header class="header">
       <h1 class="title">Ciclos de sueño</h1>
       <p class="subtitle">Cada ciclo dura 90 min. Despertar al final de uno te deja fresco.</p>
     </header>
 
-    <div class="segmented" role="tablist" aria-label="Modo de cálculo">
+    <section class="favorites" aria-label="Horas favoritas">
+      <div class="favorites__header">
+        <h2 class="favorites__title">Horas favoritas</h2>
+      </div>
+      <div class="favorites__row" id="favorites-row">
+        <button class="favorite-add" id="add-favorite" type="button" aria-expanded="false">
+          <span class="favorite-add__icon">+</span> Agregar
+        </button>
+      </div>
+      <form class="favorite-form glass" id="favorite-form" hidden>
+        <input type="text" id="favorite-label" class="favorite-form__input" placeholder="Etiqueta (ej. Entre semana)" maxlength="24" autocomplete="off" />
+        <input type="time" id="favorite-time" class="favorite-form__input" />
+        <div class="favorite-form__actions">
+          <button type="button" class="favorite-form__cancel" id="favorite-cancel">Cancelar</button>
+          <button type="submit" class="favorite-form__save">Guardar</button>
+        </div>
+      </form>
+    </section>
+
+    <div class="segmented glass" role="tablist" aria-label="Modo de cálculo">
       <button class="segmented__option" role="tab" id="tab-wake" aria-selected="true" data-mode="wake">
         Quiero despertar a...
       </button>
@@ -38,17 +60,28 @@
     <section class="panel" id="panel-wake" role="tabpanel" aria-labelledby="tab-wake">
       <label class="field">
         <span class="field__label">Hora a la que quieres despertar</span>
-        <input type="time" id="wake-time" class="field__input" />
+        <input type="time" id="wake-time" class="field__input glass" />
       </label>
       <button class="cta" id="calc-wake">Calcular horas para dormir</button>
     </section>
 
     <section class="panel" id="panel-sleep" role="tabpanel" aria-labelledby="tab-sleep" hidden>
-      <p class="now-readout" id="now-readout"></p>
+      <p class="now-readout glass" id="now-readout"></p>
       <button class="cta" id="calc-sleep">Calcular horas para despertar</button>
     </section>
 
     <section class="results" id="results" aria-live="polite"></section>
+
+    <section class="report glass" id="report-section" hidden>
+      <div class="report__header">
+        <h2 class="report__title">Resumen semanal</h2>
+        <span class="report__subtitle" id="report-status">Sin conectar</span>
+      </div>
+      <div class="report__empty" id="report-empty">
+        <p>Aún no hay datos de tu reloj conectados.</p>
+        <p class="report__empty-hint">Cuando configures Health Auto Export, tu promedio semanal va a aparecer acá.</p>
+      </div>
+    </section>
   </div>
 
   <script src="app.js"></script>

@@ -70,12 +70,12 @@ function hexToRgb(hex) {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-// Palette: monochrome black & white (Notion-style) - flat black tile,
-// white crescent moon and stars. No gradient, no color.
-const TOP = hexToRgb('#191919');
-const BOTTOM = hexToRgb('#191919');
+// Palette: Liquid Glass violet - deep indigo-violet gradient tile with a
+// soft white crescent moon and glowing stars.
+const TOP = hexToRgb('#7c3aed');
+const BOTTOM = hexToRgb('#1e1240');
 const MOON_LIGHT = hexToRgb('#ffffff');
-const MOON_SHADOW = hexToRgb('#ffffff');
+const MOON_SHADOW = hexToRgb('#e9e1ff');
 
 function drawIcon({ size, moonScale = 0.62, stars = true, cornerRadius = 0.22 }) {
   const rgba = Buffer.alloc(size * size * 4);

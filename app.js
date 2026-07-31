@@ -1,5 +1,7 @@
 const CYCLE_MIN = 90;
 const FALL_ASLEEP_MIN = 15;
+const FAVORITES_KEY = 'sleepcycle.favorites.v1';
+const PIN_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L21 9.27l-4.5 4.38L17.8 21 12 17.77 6.2 21l1.3-7.35L3 9.27l6.1-1.01z"/></svg>';
 
 const tabs = {
   wake: document.getElementById('tab-wake'),
@@ -13,6 +15,12 @@ const thumb = document.querySelector('.segmented__thumb');
 const resultsEl = document.getElementById('results');
 const wakeTimeInput = document.getElementById('wake-time');
 const nowReadout = document.getElementById('now-readout');
+const favoritesRow = document.getElementById('favorites-row');
+const addFavoriteBtn = document.getElementById('add-favorite');
+const favoriteForm = document.getElementById('favorite-form');
+const favoriteLabelInput = document.getElementById('favorite-label');
+const favoriteTimeInput = document.getElementById('favorite-time');
+const favoriteCancelBtn = document.getElementById('favorite-cancel');
 
 let currentMode = 'wake';
 
@@ -91,6 +99,7 @@ function renderResults(items) {
         <span class="result-card__cycles">${item.cycles} ciclos · ${item.hoursLabel}</span>
         ${item.recommended ? '<span class="result-card__badge">Recomendado</span>' : ''}
       </span>
+      <button type="button" class="result-card__pin" data-pin-time="${item.time}" data-pin-label="Despertar · ${item.cycles} ciclos" aria-label="Guardar como hora favorita">${PIN_ICON}</button>
     `;
     return card;
   });
@@ -130,7 +139,7 @@ function hoursLabel(totalMinutes) {
   return m === 0 ? `${h}h` : `${h}h ${m}m`;
 }
 
-document.getElementById('calc-wake').addEventListener('click', () => {
+function computeWakeResults() {
   if (!wakeTimeInput.value) {
     wakeTimeInput.focus();
     return;
@@ -158,7 +167,9 @@ document.getElementById('calc-wake').addEventListener('click', () => {
     .sort((a, b) => a.date - b.date);
 
   renderBedtimeResults(items);
-});
+}
+
+document.getElementById('calc-wake').addEventListener('click', computeWakeResults);
 
 document.getElementById('calc-sleep').addEventListener('click', () => {
   const now = new Date();
@@ -184,6 +195,139 @@ document.getElementById('calc-sleep').addEventListener('click', () => {
 // Default the wake-time input to a sensible value (7:00 AM) on first load
 if (!wakeTimeInput.value) {
   wakeTimeInput.value = '07:00';
+}
+
+// --- Horas favoritas -------------------------------------------------
+
+function loadFavorites() {
+  try {
+    const raw = localStorage.getItem(FAVORITES_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveFavorites(list) {
+  try {
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(list));
+  } catch {
+    // Safari private mode or storage full: favorites just won't persist.
+  }
+}
+
+function makeId() {
+  return typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+let favorites = loadFavorites();
+
+function formatFavoriteTime(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  return formatTime(d);
+}
+
+function renderFavorites() {
+  favoritesRow.querySelectorAll('.favorite-chip').forEach((chip) => chip.remove());
+
+  favorites.forEach((fav) => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'favorite-chip';
+    chip.dataset.id = fav.id;
+    chip.innerHTML = `
+      <span class="favorite-chip__label">${fav.label}</span>
+      <span class="favorite-chip__time">${formatFavoriteTime(fav.time)}</span>
+      <span class="favorite-chip__remove" data-remove="${fav.id}" role="button" aria-label="Eliminar ${fav.label}">×</span>
+    `;
+    favoritesRow.insertBefore(chip, addFavoriteBtn);
+  });
+}
+
+function addFavorite(label, time) {
+  const exists = favorites.some((f) => f.time === time && f.label === label);
+  if (exists) return;
+  favorites.push({ id: makeId(), label: label || 'Favorita', time });
+  saveFavorites(favorites);
+  renderFavorites();
+}
+
+function removeFavorite(id) {
+  favorites = favorites.filter((f) => f.id !== id);
+  saveFavorites(favorites);
+  renderFavorites();
+}
+
+favoritesRow.addEventListener('click', (e) => {
+  const removeTarget = e.target.closest('[data-remove]');
+  if (removeTarget) {
+    e.stopPropagation();
+    removeFavorite(removeTarget.dataset.remove);
+    return;
+  }
+  const chip = e.target.closest('.favorite-chip');
+  if (!chip) return;
+  const fav = favorites.find((f) => f.id === chip.dataset.id);
+  if (!fav) return;
+  wakeTimeInput.value = fav.time;
+  if (currentMode !== 'wake') switchTab('wake');
+  computeWakeResults();
+});
+
+function toggleFavoriteForm(show) {
+  favoriteForm.hidden = !show;
+  addFavoriteBtn.setAttribute('aria-expanded', String(show));
+  if (show) {
+    favoriteForm.offsetHeight; // force reflow so the transition runs
+    requestAnimationFrame(() => {
+      favoriteForm.dataset.visible = 'true';
+    });
+    favoriteLabelInput.focus();
+  } else {
+    delete favoriteForm.dataset.visible;
+    favoriteForm.reset();
+  }
+}
+
+addFavoriteBtn.addEventListener('click', () => {
+  toggleFavoriteForm(favoriteForm.hidden);
+});
+
+favoriteCancelBtn.addEventListener('click', () => toggleFavoriteForm(false));
+
+favoriteForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (!favoriteTimeInput.value) {
+    favoriteTimeInput.focus();
+    return;
+  }
+  addFavorite(favoriteLabelInput.value.trim(), favoriteTimeInput.value);
+  toggleFavoriteForm(false);
+});
+
+resultsEl.addEventListener('click', (e) => {
+  const pinBtn = e.target.closest('.result-card__pin');
+  if (!pinBtn) return;
+  addFavorite(pinBtn.dataset.pinLabel, pinBtn.dataset.pinTime);
+  pinBtn.dataset.pinned = 'true';
+  pinBtn.classList.remove('pulse');
+  // eslint-disable-next-line no-unused-expressions
+  pinBtn.offsetWidth; // restart the animation on repeated taps
+  pinBtn.classList.add('pulse');
+});
+
+renderFavorites();
+
+// --- Weekly health report (hidden scaffold) ---------------------------
+// Stays hidden until Health Auto Export + the sync backend are set up
+// (targeted for 2026-08-05). Preview with ?beta=health in the URL.
+if (new URLSearchParams(location.search).get('beta') === 'health') {
+  const reportSection = document.getElementById('report-section');
+  if (reportSection) reportSection.hidden = false;
 }
 
 if ('serviceWorker' in navigator) {
