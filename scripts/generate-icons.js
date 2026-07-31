@@ -65,6 +65,10 @@ function mix(a, b, t) {
   return a + (b - a) * t;
 }
 
+function lighten(component, amount) {
+  return component + (255 - component) * amount;
+}
+
 function hexToRgb(hex) {
   const n = parseInt(hex.replace('#', ''), 16);
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
@@ -97,6 +101,24 @@ function drawIcon({ size, moonScale = 0.62, stars = true, cornerRadius = 0.22 })
   ];
 
   const radius = size * cornerRadius;
+
+  // Glass surface FX: a diagonal specular streak (like light grazing a
+  // glass panel) and a soft ambient sheen from the upper-left, matching
+  // the app's glassmorphism cards.
+  const streakAngle = (-35 * Math.PI) / 180;
+  const streakDirX = Math.cos(streakAngle);
+  const streakDirY = Math.sin(streakAngle);
+  const streakNormalX = -streakDirY;
+  const streakNormalY = streakDirX;
+  const streakCx = size * 0.5;
+  const streakCy = size * 0.3;
+  const streakWidth = size * 0.16;
+
+  const sheenCx = size * 0.32;
+  const sheenCy = size * 0.22;
+  const sheenR = size * 0.55;
+
+  const rimWidth = Math.max(1.5, size * 0.012);
 
   for (let y = 0; y < size; y++) {
     const t = y / size;
@@ -150,6 +172,41 @@ function drawIcon({ size, moonScale = 0.62, stars = true, cornerRadius = 0.22 })
             g_ = mix(g_, 255, intensity);
             b_ = mix(b_, 255, intensity);
           }
+        }
+      }
+
+      if (alpha > 0.01) {
+        // Diagonal specular streak
+        const perpDist = (x - streakCx) * streakNormalX + (y - streakCy) * streakNormalY;
+        if (Math.abs(perpDist) < streakWidth) {
+          const streakT = 1 - Math.abs(perpDist) / streakWidth;
+          const streakAmount = streakT * streakT * 0.22;
+          r_ = lighten(r_, streakAmount);
+          g_ = lighten(g_, streakAmount);
+          b_ = lighten(b_, streakAmount);
+        }
+
+        // Ambient sheen (soft light from the upper-left)
+        const sheenDist = Math.hypot(x - sheenCx, y - sheenCy);
+        if (sheenDist < sheenR) {
+          const sheenT = 1 - sheenDist / sheenR;
+          const sheenAmount = sheenT * sheenT * 0.16;
+          r_ = lighten(r_, sheenAmount);
+          g_ = lighten(g_, sheenAmount);
+          b_ = lighten(b_, sheenAmount);
+        }
+
+        // Beveled glass rim along the rounded-square edge
+        let insetFromEdge = Math.min(x, size - 1 - x, y, size - 1 - y);
+        if (dx > 0 && dy > 0) {
+          const cornerDist = Math.sqrt(dx * dx + dy * dy);
+          insetFromEdge = radius - cornerDist;
+        }
+        if (insetFromEdge >= 0 && insetFromEdge < rimWidth) {
+          const rimAmount = (1 - insetFromEdge / rimWidth) * 0.3;
+          r_ = lighten(r_, rimAmount);
+          g_ = lighten(g_, rimAmount);
+          b_ = lighten(b_, rimAmount);
         }
       }
 
